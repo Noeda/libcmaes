@@ -260,7 +260,26 @@ namespace libcmaes
 	    _elitist = _initial_elitist = false;
 	  }
       }
-      
+
+      /**
+       * \brief sets if elite should be re-evaluated after each iteration.
+       *
+       * If the objective function is noisy, then the elite candidate might
+       * accidentally get a really high fitness and it will take a long
+       * time for it to be surpassed. Re-evaluating the fitness of the
+       * elite each iteration combats this.
+       *
+       * Elitism must be turned for this to take effect.
+       *
+       * @param revaluate_elite 0: no re-evaluation, 1: do re-evaluation
+       */
+      inline void set_revaluate_elite(const int &revaluate_elite) {
+          if (revaluate_elite == 0)
+            _revaluate_elite = false;
+          else
+            _revaluate_elite = true;
+      }
+
       /**
        * \brief all stopping criteria are active by default, this allows to control
        *        them
@@ -320,6 +339,7 @@ namespace libcmaes
       bool _vd = false;
       
       bool _elitist = false; /**< re-inject the best-ever seen solution. */
+      bool _revaluate_elite = false; /**< re-evaluate elite each iteration. */
       bool _initial_elitist = false; /**< re-inject x0. */
       bool _initial_elitist_on_restart = false; /**< activate the restart from and re-injection of the best seen solution if not the final one. */
       

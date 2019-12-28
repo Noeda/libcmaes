@@ -1,3 +1,13 @@
+## Fork of https://github.com/beniz/libcmaes
+
+- As of writing of this, my only modification is that there is a
+  `.set_revaluate_elite(const int &reevaluate)` that will re-evaluate fitness
+  value of the elite candidate, if turned on. I found it useful to improve
+  convergence speed on a particular problem I had.
+
+I do not recommend anyone to use this fork, unless somehow you had exactly that
+same problem.
+
 ## libcmaes
 libcmaes is a multithreaded C++11 implementation (with Python bindings) of algorithms of the CMA-ES family for optimization of nonlinear non-convex 'blackbox' functions. The implemented algorithms have a wide range of applications in various disciplines, ranging from pure function minimization, optimization in industrial and scientific applications, to the solving of reinforcement and machine learning problems.
 

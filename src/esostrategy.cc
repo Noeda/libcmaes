@@ -88,10 +88,36 @@ namespace libcmaes
 #ifdef HAVE_DEBUG
     std::chrono::time_point<std::chrono::system_clock> tstart = std::chrono::system_clock::now();
 #endif
+    bool we_need_to_inject_elite = false;
+    bool we_need_to_recompute_elite = false;
+    double recomputed_elite_fvalue = 0.0;
+    int elite_nfcalls = 0;
+    Candidate ref_candidate;
+
+    if (_niter > 0 && (_parameters._elitist || _parameters._initial_elitist || (_initial_elitist && _parameters._initial_elitist_on_restart))) {
+        we_need_to_inject_elite = true;
+        we_need_to_recompute_elite = _parameters._revaluate_elite;
+	if (_parameters._initial_elitist_on_restart || _parameters._initial_elitist)
+	  {
+	    ref_candidate = _solutions._initial_candidate;
+	  }
+	else if (_parameters._elitist)
+	  {
+	    ref_candidate = _solutions._best_seen_candidate;
+	  }
+    }
+
     // one candidate per row.
 #pragma omp parallel for if (_parameters._mt_feval)
-    for (int r=0;r<candidates.cols();r++)
+    for (int r=0;r<candidates.cols()+1;r++)
       {
+        if (r == candidates.cols()) {
+            if (we_need_to_recompute_elite) {
+                recomputed_elite_fvalue = _func(ref_candidate.get_x_ptr(), ref_candidate.get_x_size());
+                elite_nfcalls++;
+            }
+            continue;
+        }
 	_solutions._candidates.at(r).set_x(candidates.col(r));
 	_solutions._candidates.at(r).set_id(r);
 	if (phenocandidates.size())
@@ -108,22 +134,25 @@ namespace libcmaes
 				perform_uh(candidates,phenocandidates,nfcalls);
       }
 
+    nfcalls += elite_nfcalls;
+
     // if an elitist is active, reinject initial solution as needed.
-    if (_niter > 0 && (_parameters._elitist || _parameters._initial_elitist || (_initial_elitist && _parameters._initial_elitist_on_restart)))
+    if (we_need_to_inject_elite)
       {
 	// get reference values.
 	double ref_fvalue = std::numeric_limits<double>::max();
-	Candidate ref_candidate;
-	
-	if (_parameters._initial_elitist_on_restart || _parameters._initial_elitist)
+
+        if (we_need_to_recompute_elite)
+          {
+            ref_fvalue = recomputed_elite_fvalue;
+          }
+        else if (_parameters._initial_elitist_on_restart || _parameters._initial_elitist)
 	  {
 	    ref_fvalue = _solutions._initial_candidate.get_fvalue();
-	    ref_candidate = _solutions._initial_candidate;
 	  }
 	else if (_parameters._elitist)
 	  {
 	    ref_fvalue = _solutions._best_seen_candidate.get_fvalue();
-	    ref_candidate = _solutions._best_seen_candidate;
 	  }
 
 	// reinject intial solution if half or more points have value above that of the initial point candidate.
