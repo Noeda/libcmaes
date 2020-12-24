@@ -62,7 +62,7 @@ sudo apt-get install autoconf automake libtool libgoogle-glog-dev libgflags-dev 
 For compiling with basic options enabled:
 ```
 ./autogen.sh
-echo "#define CMAES_EXPORT" > cmaes_export.h
+echo "#define CMAES_EXPORT" > include/libcmaes/cmaes_export.h
 ./configure
 make
 ```
@@ -71,7 +71,7 @@ For compiling with CMake:
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=~/.local/ .
+cmake .. -DCMAKE_INSTALL_PREFIX=~/.local/
 make -j2
 make install
 ```
@@ -151,6 +151,12 @@ sudo apt-get install libboost-python-dev
 make
 make install
 ```
+
+and with `cmake`:
+```
+cmake .. -DCMAKE_INSTALL_PREFIX=~/.local/ -DLIBCMAES_BUILD_PYTHON=ON
+```
+
 - test the bindings:
 ```
 cd python
